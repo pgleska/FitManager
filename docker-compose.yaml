@@ -1,0 +1,41 @@
+version: '3'
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    hostname: fitmanager-db
+    container_name: fitmanager-db
+    volumes:
+      - /usr/share/zoneinfo/:/usr/share/zoneinfo/:ro
+      - ./docker/db/fitmanager.sql:/docker-entrypoint-initdb.d/fitmanager.sql:ro
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysecretpassword
+      - MYSQL_DATABASE=fitmanager
+      - MYSQL_ADMIN=admin
+      - MYSQL_PASSWORD=mysecretpassword 
+    networks:
+      - fitmanager  
+
+  backend:
+    build: ./docker/backend
+    restart: always
+    hostname: fitmanager-backend
+    container_name: fitmanager-backend
+    volumes:
+      - ./docker/backend/fitmanager.jar:/opt/fitmanager/fitmanager.jar:ro
+    ports:
+      - 8001:8001
+      - 8080:8080  
+    depends_on:
+      - db
+    environment:    
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8001
+    networks:
+      - fitmanager  
+      
+networks:
+  fitmanager:
+
+    
+   
+  
